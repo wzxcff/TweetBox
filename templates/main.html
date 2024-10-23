@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+   
+    <title>Feed | TweetBox</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Montserrat", sans-serif;
+            background-color: #0a0a0a;
+            color: white;
+            text-decoration: none;
+        }
+        
+        img {
+            width: 100px;
+            height: 100px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">TweetBox</div>
+        <div class="navbar-elements">
+            <a href="{% url 'feed_view' %}">Feed</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="new-tweet">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <label for="images"></label>
+                <input type="file" name="images" id="images" multiple alt="upload images">
+                <br>
+                <button type="submit">Tweet</button>
+            </form>
+        </div>
+        {% if tweets %}
+            {% for tweet in tweets %}
+                <div class="tweet-card">
+                    {% if user == tweet.author %}
+                        <p>{{ tweet.author }} &bull; {{ tweet.created_at|date:"d-m-Y H:i" }}<a href="{% url 'delete_tweet' tweet.id %}">Delete</a></p>
+                    {% else %}
+                        <p>{{ tweet.author }} &bull; {{ tweet.created_at|date:"d-m-Y H:i" }}</p>
+                    {% endif %}
+                        <p><small>{{ tweet.text }}</small></p>
+                    {% if tweet.images.all %}
+                        {% for image in tweet.images.all %}
+                            <a href="{{ image.image.url }}" target="_blank">
+                                <img src="{{ image.image.url }}" alt="Tweet image">
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                    <div class="likes-field">
+                        <form action="{% url 'like_tweet' tweet.id %}" method="POST">
+                            {% csrf_token %}
+                            {% if user in tweet.likes.all %}
+                                <button type="submit">Unlike</button>
+                            {% else %}
+                                <button type="submit">Like</button>
+                            {% endif %}
+                        </form>
+                        <p>{{ tweet.total_likes }} Likes</p>
+                    </div>
+                </div>
+                <br>
+            {% endfor %}
+        {% else %}
+            <p>No tweets available!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

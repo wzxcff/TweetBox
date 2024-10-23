@@ -1,0 +1,4 @@
+settings.py
+media/tweets/*
+db.sqlite3
+.idea
